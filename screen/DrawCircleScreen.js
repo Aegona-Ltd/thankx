@@ -12,8 +12,20 @@ const { width, height } = Dimensions.get('screen')
 const DrawCircleScreen = () => {
 
     const [listCircle, setListCircle] = useState([])
+    const [isSuccess, setIsSuccess] = useState(false)
     const [listCirclePosition, setListCirclePosition] = useState([])
+    const [colorCode, setColorCode] = useState()
     let isTap = 0
+
+    useEffect(()=>{
+        console.log("COLOR", colorCode)
+        var list = [...listCirclePosition]
+        var item = list[list.length-1]
+        if(colorCode != undefined){
+            item.color = colorCode
+            setListCirclePosition(list)
+        }
+    }, [colorCode])
 
     useEffect(() => {
         listCirclePosition.forEach((item, index) => {
@@ -21,7 +33,7 @@ const DrawCircleScreen = () => {
                 width: item.size,
                 height: item.size,
                 borderRadius: item.size / 2,
-                backgroundColor: `${item.color}`,
+                backgroundColor:`${item.color}`,
                 position: 'absolute',
                 top: item.y - (item.size / 2),
                 left: item.x - (item.size / 2),
@@ -55,16 +67,45 @@ const DrawCircleScreen = () => {
         this.doubleTap = setTimeout(() => {
             if (isTap == 1) {
                 isTap = 0
+                async function getColor() {
+                    let url = 'http://www.colourlovers.com/api/colors/random?format=json';
+                    await (fetch(url)
+                        .then((res) => res.json())
+                        .then((response) => {
+                            setColorCode('#' + response[0].hex)
+                            setIsSuccess(true)
+                        })
+                        .catch((err) => {
+                            setColorCode('')
+                            setIsSuccess(false)
+                        }))
+                }
+                getColor()
                 setListCirclePosition([...listCirclePosition, {
                     x: e.locationX,
                     y: e.locationY,
                     size: _randomSize(),
+                    // color: (isSuccess == true & colorCode !== null) ? colorCode : `${_randomColor()}` 
                     color: `${_randomColor()}`
                 }])
             } else {
                 isTap = 0
                 //double tap
                 console.log("TAP")
+                async function getColor() {
+                    let url = 'http://www.colourlovers.com/api/colors/random?format=json';
+                    await (fetch(url)
+                        .then((res) => res.json())
+                        .then((response) => {
+                            setColorCode('#' + response[0].hex)
+                            setIsSuccess(true)
+                        })
+                        .catch((err) => {
+                            setColorCode('')
+                            setIsSuccess(false)
+                        }))
+                }
+                getColor()
                 _randomColorWithCircle(e)
             }
         }, 200);
