@@ -12,20 +12,8 @@ const { width, height } = Dimensions.get('screen')
 const DrawCircleScreen = () => {
 
     const [listCircle, setListCircle] = useState([])
-    const [isSuccess, setIsSuccess] = useState(false)
     const [listCirclePosition, setListCirclePosition] = useState([])
-    const [colorCode, setColorCode] = useState()
     let isTap = 0
-
-    useEffect(()=>{
-        console.log("COLOR", colorCode)
-        var list = [...listCirclePosition]
-        var item = list[list.length-1]
-        if(colorCode != undefined){
-            item.color = colorCode
-            setListCirclePosition(list)
-        }
-    }, [colorCode])
 
     useEffect(() => {
         listCirclePosition.forEach((item, index) => {
@@ -33,7 +21,7 @@ const DrawCircleScreen = () => {
                 width: item.size,
                 height: item.size,
                 borderRadius: item.size / 2,
-                backgroundColor:`${item.color}`,
+                backgroundColor: `${item.color}`,
                 position: 'absolute',
                 top: item.y - (item.size / 2),
                 left: item.x - (item.size / 2),
@@ -48,10 +36,10 @@ const DrawCircleScreen = () => {
     const panResponder = React.useMemo(() => PanResponder.create({
         onStartShouldSetPanResponder: (event, gestureState) => true,
         onStartShouldSetPanResponderCapture: (event, gestureState) => true,
-        onMoveShouldSetPanResponder: (event, gestureState) => false,
-        onMoveShouldSetPanResponderCapture: (event, gestureState) => false,
-        onPanResponderGrant: (event, gestureState) => false,
-        onPanResponderMove: (event, gestureState) => false,
+        onMoveShouldSetPanResponder: (event, gestureState) => true,
+        onMoveShouldSetPanResponderCapture: (event, gestureState) => true,
+        onPanResponderGrant: (event, gestureState) => true,
+        onPanResponderMove: (event, gestureState) => true,
         onPanResponderRelease: (event, gestureState) => {
             // setLocationX(event.nativeEvent.locationX.toFixed(2))
             // setLocationY(event.nativeEvent.locationY.toFixed(2))
@@ -72,43 +60,47 @@ const DrawCircleScreen = () => {
                     await (fetch(url)
                         .then((res) => res.json())
                         .then((response) => {
-                            setColorCode('#' + response[0].hex)
-                            setIsSuccess(true)
+                            console.log("COLOR: ", '#' + response[0].hex)
+                            setListCirclePosition([...listCirclePosition, {
+                                x: e.locationX,
+                                y: e.locationY,
+                                size: _randomSize(),
+                                color: '#' + response[0].hex
+                            }])
                         })
                         .catch((err) => {
-                            setColorCode('')
-                            setIsSuccess(false)
+                            console.log(err)
+                            setListCirclePosition([...listCirclePosition, {
+                                x: e.locationX,
+                                y: e.locationY,
+                                size: _randomSize(),
+                                color: `${_randomColor()}`,
+                            }])
                         }))
                 }
                 getColor()
-                setListCirclePosition([...listCirclePosition, {
-                    x: e.locationX,
-                    y: e.locationY,
-                    size: _randomSize(),
-                    // color: (isSuccess == true & colorCode !== null) ? colorCode : `${_randomColor()}` 
-                    color: `${_randomColor()}`
-                }])
+
             } else {
                 isTap = 0
                 //double tap
                 console.log("TAP")
-                async function getColor() {
+                async function getNewColor() {
                     let url = 'http://www.colourlovers.com/api/colors/random?format=json';
                     await (fetch(url)
                         .then((res) => res.json())
                         .then((response) => {
-                            setColorCode('#' + response[0].hex)
-                            setIsSuccess(true)
+                            console.log("NEW COLOR: ", '#' + response[0].hex)
+                            _randomColorWithCircle(e, '#' + response[0].hex)
                         })
                         .catch((err) => {
-                            setColorCode('')
-                            setIsSuccess(false)
+                            console.log(err)
+                            _randomColorWithCircle(e, `${_randomColor()}`)
                         }))
                 }
-                getColor()
-                _randomColorWithCircle(e)
+                getNewColor()
+                
             }
-        }, 200);
+        }, 300);
 
         // setListCirclePosition([...listCirclePosition, {
         // x: e.locationX,
@@ -118,7 +110,8 @@ const DrawCircleScreen = () => {
         // }])
     }
 
-    _randomColorWithCircle = (e) => {
+    _randomColorWithCircle = (e, newColor) => {
+        console.log("=>>>COLOR: ", newColor)
         var indexChange = -1
         listCirclePosition.forEach((item, index) => {
             let maxX = item.x + (item.size / 2)
@@ -136,7 +129,7 @@ const DrawCircleScreen = () => {
 
         if (indexChange != -1) {
             let item = listCirclePosition[indexChange]
-            item.color = _randomColor()
+            item.color = newColor
             let list = [...listCirclePosition]
             list[indexChange] = item
             setListCirclePosition(list)

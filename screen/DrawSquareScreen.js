@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
+    Image,
     PanResponder,
-    Dimensions
+    Dimensions,
+    ImageBackground
 } from 'react-native';
 import randomColor from 'randomcolor'
 
@@ -17,7 +19,7 @@ const DrawSquareScreen = () => {
 
     useEffect(() => {
         listSquarePosition.forEach((item, index) => {
-            listSquare.push(<View key={index} style={{
+            listSquare.push(<ImageBackground source = {{uri: item.pattern}} key={index} style={{
                 width: item.size,
                 height: item.size,
                 backgroundColor: `${item.color}`,
@@ -26,7 +28,9 @@ const DrawSquareScreen = () => {
                 left: item.x - (item.size / 2),
                 justifyContent: 'center',
                 alignItems: 'center'
-            }} />)
+            }}>
+             
+            </ImageBackground>)
         })
 
         setListSquare([listSquare])
@@ -54,29 +58,55 @@ const DrawSquareScreen = () => {
         this.doubleTap = setTimeout(() => {
             if (isTap == 1) {
                 isTap = 0
-                setListSquarePosition([...listSquarePosition, {
-                    x: e.locationX,
-                    y: e.locationY,
-                    size: _randomSize(),
-                    color: `${_randomColor()}`
-                }])
+                async function getPattern() {
+                    let url = 'http://www.colourlovers.com/api/patterns/random?format=json';
+                    await (fetch(url)
+                        .then((res) => res.json())
+                        .then((response) => {
+                            console.log("PATTERN: ", response[0].imageUrl)
+                            setListSquarePosition([...listSquarePosition, {
+                                x: e.locationX,
+                                y: e.locationY,
+                                pattern: response[0].imageUrl,
+                                size: _randomSize(),
+                                color: "transparent",
+                            }])
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                            setListSquarePosition([...listSquarePosition, {
+                                x: e.locationX,
+                                y: e.locationY,
+                                pattern: 'transparent',
+                                size: _randomSize(),
+                                color: `${_randomColor()}`,
+                            }])
+                        }))
+                }
+                getPattern()
             } else {
                 isTap = 0
                 //double tap
                 console.log("TAP")
-                _randomColorWithSquare(e)
+                async function getNewPattern() {
+                    let url = 'http://www.colourlovers.com/api/patterns/random?format=json';
+                    await (fetch(url)
+                        .then((res) => res.json())
+                        .then((response) => {
+                            console.log("PATTERN: ", response[0].imageUrl)
+                            _randomColorWithSquare(e, response[0].imageUrl, "#D9D9D9")
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                            _randomColorWithSquare(e, "transparent", `${_randomColor()}`)
+                        }))
+                }
+                getNewPattern()
             }
-        }, 200);
-
-        // setListSquarePosition([...listSquarePosition, {
-        // x: e.locationX,
-        // y: e.locationY,
-        // size: _randomSize(),
-        // color: `${_randomColor()}`
-        // }])
+        }, 300);
     }
 
-    _randomColorWithSquare = (e) => {
+    _randomColorWithSquare = (e, newPattern, newColor ) => {
         var indexChange = -1
         listSquarePosition.forEach((item, index) => {
             let maxX = item.x + (item.size / 2)
@@ -94,7 +124,8 @@ const DrawSquareScreen = () => {
 
         if (indexChange != -1) {
             let item = listSquarePosition[indexChange]
-            item.color = _randomColor()
+            item.pattern = newPattern
+            item.color = newColor
             let list = [...listSquarePosition]
             list[indexChange] = item
             setListSquarePosition(list)
