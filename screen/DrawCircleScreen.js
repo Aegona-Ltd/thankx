@@ -105,13 +105,6 @@ const DrawCircleScreen = () => {
                 
             }
         }, 300);
-
-        // setListCirclePosition([...listCirclePosition, {
-        // x: e.locationX,
-        // y: e.locationY,
-        // size: _randomSize(),
-        // color: `${_randomColor()}`
-        // }])
     }
 
     _changeStyleOfCircle = (e, newColor) => {
@@ -152,11 +145,7 @@ const DrawCircleScreen = () => {
 
     return (
         <View
-
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {/* <Text>Device name : {deviceName}</Text>
- <Text>Device model : {deviceModel}</Text>
- <Text>Device mac address : {deviceMacAddress}</Text> */}
             {listCircle}
 
             <View

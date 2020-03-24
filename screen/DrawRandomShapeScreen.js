@@ -206,6 +206,7 @@ const DrawRandomShapeScreen = () => {
                 }
             }
         })
+        let list = [...listArtPosition]
 
         if (indexChange != -1) {
             let item = listArtPosition[indexChange]
@@ -218,14 +219,12 @@ const DrawRandomShapeScreen = () => {
                         .then((response) => {
                             console.log("NEW COLOR: ", '#' + response[0].hex)
                             item.color = '#' + response[0].hex
-                            let list = [...listArtPosition]
                             list[indexChange] = item
                             setListArtPosition(list)
                         })
                         .catch((err) => {
                             console.log(err)
                             item.color = _randomColor()
-                            let list = [...listArtPosition]
                             list[indexChange] = item
                             setListArtPosition(list)
                         }))
@@ -241,7 +240,6 @@ const DrawRandomShapeScreen = () => {
                             console.log("PATTERN: ", response[0].imageUrl)
                             item.color = '#D9D9D9'
                             item.pattern = response[0].imageUrl
-                            let list = [...listArtPosition]
                             list[indexChange] = item
                             setListArtPosition(list)
                         })
@@ -249,7 +247,6 @@ const DrawRandomShapeScreen = () => {
                             console.log(err)
                             item.color = `${_randomColor()}`
                             item.pattern = 'transparent'
-                            let list = [...listArtPosition]
                             list[indexChange] = item
                             setListArtPosition(list)
                         }))
@@ -264,14 +261,12 @@ const DrawRandomShapeScreen = () => {
                         .then((response) => {
                             console.log("NEW COLOR: ", '#' + response[0].hex)
                             item.color = '#' + response[0].hex
-                            let list = [...listArtPosition]
                             list[indexChange] = item
                             setListArtPosition(list)
                         })
                         .catch((err) => {
                             console.log(err)
                             item.color = _randomColor()
-                            let list = [...listArtPosition]
                             list[indexChange] = item
                             setListArtPosition(list)
                         }))
@@ -293,11 +288,7 @@ const DrawRandomShapeScreen = () => {
 
     return (
         <View
-
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {/* <Text>Device name : {deviceName}</Text>
- <Text>Device model : {deviceModel}</Text>
- <Text>Device mac address : {deviceMacAddress}</Text> */}
             {listArt}
 
             <View
