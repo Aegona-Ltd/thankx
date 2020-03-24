@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
+    Animated,
     PanResponder,
     Dimensions
 } from 'react-native';
@@ -10,6 +11,8 @@ import randomColor from 'randomcolor'
 const { width, height } = Dimensions.get('screen')
 
 const DrawCircleScreen = () => {
+
+    const [pan, setPan] = useState(new Animated.ValueXY())
 
     const [listCircle, setListCircle] = useState([])
     const [listCirclePosition, setListCirclePosition] = useState([])
@@ -40,6 +43,7 @@ const DrawCircleScreen = () => {
         onMoveShouldSetPanResponderCapture: (event, gestureState) => true,
         onPanResponderGrant: (event, gestureState) => true,
         onPanResponderMove: (event, gestureState) => true,
+
         onPanResponderRelease: (event, gestureState) => {
             // setLocationX(event.nativeEvent.locationX.toFixed(2))
             // setLocationY(event.nativeEvent.locationY.toFixed(2))
@@ -90,11 +94,11 @@ const DrawCircleScreen = () => {
                         .then((res) => res.json())
                         .then((response) => {
                             console.log("NEW COLOR: ", '#' + response[0].hex)
-                            _randomColorWithCircle(e, '#' + response[0].hex)
+                            _changeStyleOfCircle(e, '#' + response[0].hex)
                         })
                         .catch((err) => {
                             console.log(err)
-                            _randomColorWithCircle(e, `${_randomColor()}`)
+                            _changeStyleOfCircle(e, `${_randomColor()}`)
                         }))
                 }
                 getNewColor()
@@ -110,7 +114,7 @@ const DrawCircleScreen = () => {
         // }])
     }
 
-    _randomColorWithCircle = (e, newColor) => {
+    _changeStyleOfCircle = (e, newColor) => {
         console.log("=>>>COLOR: ", newColor)
         var indexChange = -1
         listCirclePosition.forEach((item, index) => {

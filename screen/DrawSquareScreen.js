@@ -28,9 +28,7 @@ const DrawSquareScreen = () => {
                 left: item.x - (item.size / 2),
                 justifyContent: 'center',
                 alignItems: 'center'
-            }}>
-             
-            </ImageBackground>)
+            }}/>)
         })
 
         setListSquare([listSquare])
@@ -94,11 +92,11 @@ const DrawSquareScreen = () => {
                         .then((res) => res.json())
                         .then((response) => {
                             console.log("PATTERN: ", response[0].imageUrl)
-                            _randomColorWithSquare(e, response[0].imageUrl, "#D9D9D9")
+                            _changeStyleOfSquare(e, response[0].imageUrl, "#D9D9D9")
                         })
                         .catch((err) => {
                             console.log(err)
-                            _randomColorWithSquare(e, "transparent", `${_randomColor()}`)
+                            _changeStyleOfSquare(e, "transparent", `${_randomColor()}`)
                         }))
                 }
                 getNewPattern()
@@ -106,7 +104,7 @@ const DrawSquareScreen = () => {
         }, 300);
     }
 
-    _randomColorWithSquare = (e, newPattern, newColor ) => {
+    _changeStyleOfSquare = (e, newPattern, newColor ) => {
         var indexChange = -1
         listSquarePosition.forEach((item, index) => {
             let maxX = item.x + (item.size / 2)

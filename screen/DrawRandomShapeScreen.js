@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
+    ImageBackground,
     PanResponder,
     Dimensions
 } from 'react-native';
@@ -10,61 +11,60 @@ import randomColor from 'randomcolor'
 const { width, height } = Dimensions.get('screen')
 
 const DrawRandomShapeScreen = () => {
-
-    const dataStyle = [1, 2, 3]
+    const dataStyleAll = [1, 2, 3]
+    const urls = ['http://www.colourlovers.com/api/colors/random?format=json',
+        'http://www.colourlovers.com/api/patterns/random?format=json']
     const [listArt, setListArt] = useState([])
     const [listArtPosition, setListArtPosition] = useState([])
     let isTap = 0
 
     useEffect(() => {
-        console.log("ITEM : " + JSON.stringify(listArtPosition))
+        console.log("ITEM : " + JSON.stringify(listArtPosition[listArtPosition.length-1]))
     }, [listArtPosition])
 
     useEffect(() => {
         listArtPosition.forEach((item, index) => {
-            listArt.push(<View key={index}
-                style={
-                    listArtPosition[index].styleShape == 1 ? {
-                        
+            listArt.push(
+                (listArtPosition[index].styleShape == 1 ?
+                    <View key={index} style={{
+                        width: item.size,
+                        height: item.size,
+                        borderRadius: item.size / 2,
+                        backgroundColor: `${item.color}`,
+                        position: 'absolute',
+                        top: item.y - (item.size / 2),
+                        left: item.x - (item.size / 2),
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }} />
+                    : listArtPosition[index].styleShape == 2 ?
+                        <ImageBackground source={{ uri: item.pattern }} key={index} style={{
                             width: item.size,
                             height: item.size,
-                            borderRadius: item.size / 2,
                             backgroundColor: `${item.color}`,
                             position: 'absolute',
                             top: item.y - (item.size / 2),
                             left: item.x - (item.size / 2),
                             justifyContent: 'center',
                             alignItems: 'center'
-                    }
-                        : listArtPosition[index].styleShape == 2 ? {
-                            width: item.size,
-                            height: item.size,
-                            backgroundColor: `${item.color}`,
+                        }} />
+                        : <View key={index} style={{
+                            width: 0,
+                            height: 0,
+                            backgroundColor: 'transparent',
+                            borderStyle: 'solid',
+                            borderLeftWidth: item.size / 2,
+                            borderRightWidth: item.size / 2,
+                            borderBottomWidth: item.size,
+                            borderLeftColor: 'transparent',
+                            borderRightColor: 'transparent',
+                            borderBottomColor: `${item.color}`,
                             position: 'absolute',
                             top: item.y - (item.size / 2),
                             left: item.x - (item.size / 2),
                             justifyContent: 'center',
                             alignItems: 'center'
-                        }
-                            : {
-                                width: 0,
-                                height: 0,
-                                borderStyle: 'solid',
-                                backgroundColor: 'transparent',
-                                borderLeftColor: 'transparent',
-                                borderRightColor: 'transparent',
-                                borderBottomColor: `${item.color}`,
-                                position: 'absolute',
-                                borderLeftWidth: item.size / 2,
-                                borderRightWidth: item.size / 2,
-                                borderBottomWidth: item.size,
-                                top: item.y - (item.size / 2),
-                                left: item.x - (item.size / 2),
-                                justifyContent: 'center',
-                                alignItems: 'center'
-                            }
-
-                } />)
+                        }} />))
         })
 
         setListArt([listArt])
@@ -88,34 +88,110 @@ const DrawRandomShapeScreen = () => {
 
     _addArt = (e) => {
         isTap++
+        let type = dataStyleAll[Math.floor(Math.random() * dataStyleAll.length)]
         clearTimeout(this.doubleTap);
         this.doubleTap = setTimeout(() => {
             if (isTap == 1) {
                 isTap = 0
-                setListArtPosition([...listArtPosition, {
-                    x: e.locationX,
-                    y: e.locationY,
-                    styleShape: dataStyle[Math.floor(Math.random() * dataStyle.length)],
-                    size: _randomSize(),
-                    color: `${_randomColor()}`
-                }])
+                    if (type === 1) {
+                        async function getStyleCircle() {
+                            let url = 'http://www.colourlovers.com/api/colors/random?format=json';
+                            await (fetch(url)
+                                .then((res) => res.json())
+                                .then((response) => {
+                                    console.log("COLOR: ", '#' + response[0].hex)
+                                    setListArtPosition([...listArtPosition, {
+                                        x: e.locationX,
+                                        y: e.locationY,
+                                        styleShape: type,
+                                        size: _randomSize(),
+                                        color: '#' + response[0].hex
+                                    }])
+                                })
+                                .catch((err) => {
+                                    console.log(err)
+                                    setListArtPosition([...listArtPosition, {
+                                        x: e.locationX,
+                                        y: e.locationY,
+                                        styleShape: type,
+                                        size: _randomSize(),
+                                        color: `${_randomColor()}`,
+                                    }])
+                                }))
+                        }
+                        getStyleCircle()
+                    }
+                    if(type === 2) {
+                        async function getStyleSquare() {
+                            let url = 'http://www.colourlovers.com/api/patterns/random?format=json';
+                            await (fetch(url)
+                                .then((res) => res.json())
+                                .then((response) => {
+                                    console.log("PATTERN: ", response[0].imageUrl)
+                                    setListArtPosition([...listArtPosition, {
+                                        x: e.locationX,
+                                        y: e.locationY,
+                                        styleShape: type,
+                                        pattern: response[0].imageUrl,
+                                        size: _randomSize(),
+                                        color: "transparent",
+                                    }])
+                                })
+                                .catch((err) => {
+                                    console.log(err)
+                                    setListArtPosition([...listArtPosition, {
+                                        x: e.locationX,
+                                        y: e.locationY,
+                                        styleShape: type,
+                                        pattern: 'transparent',
+                                        size: _randomSize(),
+                                        color: `${_randomColor()}`,
+                                    }])
+                                }))
+                        }
+                        getStyleSquare()
+                    }
+                if (type == 3) {
+                    async function getStyleTriangle() {
+                        let url = 'http://www.colourlovers.com/api/colors/random?format=json';
+                        await (fetch(url)
+                            .then((res) => res.json())
+                            .then((response) => {
+                                console.log("PATTERN: ", response[0].imageUrl)
+                                setListArtPosition([...listArtPosition, {
+                                    x: e.locationX,
+                                    y: e.locationY,
+                                    styleShape: type,
+                                    size: _randomSize(),
+                                    color: '#' + response[0].hex,
+                                }])
+                            })
+                            .catch((err) => {
+                                console.log(err)
+                                setListArtPosition([...listArtPosition, {
+                                    x: e.locationX,
+                                    y: e.locationY,
+                                    styleShape: type,
+                                    size: _randomSize(),
+                                    color: `${_randomColor()}`,
+                                }])
+                            }))
+                    }
+                    getStyleTriangle()
+                }
+        
+            
             } else {
                 isTap = 0
                 //double tap
                 console.log("TAP")
-                _randomColorWithArt(e)
+                _changeStyleWithArt(e)
             }
-        }, 200);
+        }, 300);
 
-        // setListArtPosition([...listArtPosition, {
-        // x: e.locationX,
-        // y: e.locationY,
-        // size: _randomSize(),
-        // color: `${_randomColor()}`
-        // }])
     }
 
-    _randomColorWithArt = (e) => {
+    _changeStyleWithArt = (e) => {
         var indexChange = -1
         listArtPosition.forEach((item, index) => {
             let maxX = item.x + (item.size / 2)
@@ -133,10 +209,75 @@ const DrawRandomShapeScreen = () => {
 
         if (indexChange != -1) {
             let item = listArtPosition[indexChange]
-            item.color = _randomColor()
-            let list = [...listArtPosition]
-            list[indexChange] = item
-            setListArtPosition(list)
+            // item.color = _randomColor()
+            if(item.styleShape === 1){
+                async function getChangeCircle() {
+                    let url = 'http://www.colourlovers.com/api/colors/random?format=json';
+                    await (fetch(url)
+                        .then((res) => res.json())
+                        .then((response) => {
+                            console.log("NEW COLOR: ", '#' + response[0].hex)
+                            item.color = '#' + response[0].hex
+                            let list = [...listArtPosition]
+                            list[indexChange] = item
+                            setListArtPosition(list)
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                            item.color = _randomColor()
+                            let list = [...listArtPosition]
+                            list[indexChange] = item
+                            setListArtPosition(list)
+                        }))
+                }
+                getChangeCircle()
+            }
+            if (item.styleShape === 2) {
+                async function getChangeSquare() {
+                    let url = 'http://www.colourlovers.com/api/patterns/random?format=json';
+                    await (fetch(url)
+                        .then((res) => res.json())
+                        .then((response) => {
+                            console.log("PATTERN: ", response[0].imageUrl)
+                            item.color = '#D9D9D9'
+                            item.pattern = response[0].imageUrl
+                            let list = [...listArtPosition]
+                            list[indexChange] = item
+                            setListArtPosition(list)
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                            item.color = `${_randomColor()}`
+                            item.pattern = 'transparent'
+                            let list = [...listArtPosition]
+                            list[indexChange] = item
+                            setListArtPosition(list)
+                        }))
+                }
+                getChangeSquare()
+            }
+            if (item.styleShape === 3) {
+                async function getChangeTriangle() {
+                    let url = 'http://www.colourlovers.com/api/colors/random?format=json';
+                    await (fetch(url)
+                        .then((res) => res.json())
+                        .then((response) => {
+                            console.log("NEW COLOR: ", '#' + response[0].hex)
+                            item.color = '#' + response[0].hex
+                            let list = [...listArtPosition]
+                            list[indexChange] = item
+                            setListArtPosition(list)
+                        })
+                        .catch((err) => {
+                            console.log(err)
+                            item.color = _randomColor()
+                            let list = [...listArtPosition]
+                            list[indexChange] = item
+                            setListArtPosition(list)
+                        }))
+                }
+                getChangeTriangle()
+            }
         }
     }
 
