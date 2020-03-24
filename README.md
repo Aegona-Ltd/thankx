@@ -1,5 +1,4 @@
-# thankx
-Demo Graphic Mobile App
+# Demo Graphic Mobile App
 
 ## Requirements
 
